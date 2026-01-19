@@ -1,0 +1,3110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniformFlow - Учет рабочей формы</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Базовые переменные */
+        :root {
+            --primary: #3366ff;
+            --primary-dark: #2952cc;
+            --primary-light: #e6eeff;
+            --secondary: #00b894;
+            --danger: #ff4757;
+            --warning: #ffa502;
+            --success: #2ed573;
+            --info: #17a2b8;
+            --dark: #2d3436;
+            --gray-1: #636e72;
+            --gray-2: #b2bec3;
+            --gray-3: #dfe6e9;
+            --light: #f8f9fa;
+            --white: #ffffff;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Общие компоненты */
+        .container {
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            padding: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .app-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--gray-1);
+            margin-bottom: 16px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-primary {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .badge-success {
+            background: rgba(46, 213, 115, 0.15);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(255, 165, 2, 0.15);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(255, 71, 87, 0.15);
+            color: var(--danger);
+        }
+
+        .badge-info {
+            background: rgba(23, 162, 184, 0.15);
+            color: var(--info);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Нижняя панель */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid var(--gray-3);
+            max-width: 500px;
+            margin: 0 auto;
+            z-index: 100;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-1);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+            flex: 1;
+            padding: 4px 0;
+            transition: var(--transition);
+        }
+
+        .tab-item.active {
+            color: var(--primary);
+        }
+
+        .tab-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+            font-size: 18px;
+        }
+
+        /* Экран авторизации */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 24px;
+        }
+
+        .login-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 32px 24px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: var(--white);
+            font-size: 32px;
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .logo-subtext {
+            font-size: 14px;
+            color: var(--gray-1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--gray-3);
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            transition: var(--transition);
+            background: var(--white);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Главная страница */
+        .welcome-section {
+            margin-bottom: 24px;
+        }
+
+        .welcome-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--dark);
+        }
+
+        .welcome-subtitle {
+            color: var(--gray-1);
+            font-size: 16px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .quick-action {
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            text-decoration: none;
+            color: var(--dark);
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .quick-action:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .quick-action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            font-size: 20px;
+        }
+
+        .quick-action-primary .quick-action-icon {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .quick-action-warning .quick-action-icon {
+            background: rgba(255, 165, 2, 0.15);
+            color: var(--warning);
+        }
+
+        .quick-action-success .quick-action-icon {
+            background: rgba(46, 213, 115, 0.15);
+            color: var(--success);
+        }
+
+        .quick-action-danger .quick-action-icon {
+            background: rgba(255, 71, 87, 0.15);
+            color: var(--danger);
+        }
+
+        .quick-action-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .quick-action-subtitle {
+            font-size: 12px;
+            color: var(--gray-1);
+        }
+
+        /* Список элементов на главной */
+        .replacement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .uniform-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .uniform-item {
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--shadow);
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .uniform-item.active {
+            background: var(--white);
+        }
+
+        .uniform-item.inactive {
+            opacity: 0.6;
+            background: var(--gray-3);
+            cursor: not-allowed;
+        }
+
+        .uniform-item.inactive .uniform-item-actions,
+        .uniform-item.inactive .checkbox-container {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .uniform-item-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .uniform-item.inactive .uniform-item-icon {
+            background: var(--gray-2);
+            color: var(--gray-1);
+        }
+
+        .uniform-item-content {
+            flex: 1;
+        }
+
+        .uniform-item-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .uniform-item-details {
+            font-size: 14px;
+            color: var(--gray-1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .size-selector {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .size-selector:hover {
+            background: var(--gray-3);
+        }
+
+        .uniform-item-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--gray-2);
+            border-radius: 4px;
+            margin-right: 8px;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .checkbox.checked {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .checkbox.checked:after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 14px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Экран сроков замены */
+        .replacement-terms-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .replacement-term-item {
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .term-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .term-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .term-date {
+            font-size: 14px;
+            color: var(--gray-1);
+        }
+
+        .term-details {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .term-detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .term-label {
+            font-size: 12px;
+            color: var(--gray-1);
+            margin-bottom: 4px;
+        }
+
+        .term-value {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .term-status {
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .status-replacement {
+            background: rgba(46, 213, 115, 0.15);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background: rgba(255, 165, 2, 0.15);
+            color: var(--warning);
+        }
+
+        .status-inactive {
+            background: rgba(99, 110, 114, 0.15);
+            color: var(--gray-1);
+        }
+
+        /* Экран размерной сетки */
+        .size-guide-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .size-card {
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .size-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .size-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .size-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .size-table th,
+        .size-table td {
+            border: 1px solid var(--gray-3);
+            padding: 10px;
+            text-align: center;
+        }
+
+        .size-table th {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .current-size {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        /* Корзина */
+        .cart-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: var(--white);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow);
+        }
+
+        .cart-item-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 20px;
+            margin-right: 16px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .cart-item-details {
+            font-size: 14px;
+            color: var(--gray-1);
+        }
+
+        .cart-item-remove {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* Календарь */
+        .calendar {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+
+        .calendar th {
+            padding: 10px;
+            text-align: center;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+            border: 1px solid var(--gray-3);
+        }
+
+        .calendar td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid var(--gray-3);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            height: 40px;
+        }
+
+        .calendar td:hover {
+            background: var(--primary-light);
+        }
+
+        .calendar td.selected {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .calendar td.disabled {
+            color: var(--gray-2);
+            background: var(--gray-3);
+            cursor: not-allowed;
+        }
+
+        .calendar td.today {
+            border: 2px solid var(--primary);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .calendar-month {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--dark);
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .calendar-nav-btn {
+            background: var(--primary-light);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .calendar-nav-btn:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .time-slot {
+            padding: 10px;
+            border: 2px solid var(--gray-3);
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .time-slot:hover {
+            border-color: var(--primary-light);
+        }
+
+        .time-slot.selected {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        .time-slot.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: var(--gray-3);
+        }
+
+        /* Модальные окна */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 440px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid var(--gray-3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--gray-1);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--gray-3);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Модальное окно изменения размера */
+        .size-modal-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .size-option {
+            padding: 8px 16px;
+            border: 2px solid var(--gray-3);
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            cursor: pointer;
+            transition: var(--transition);
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .size-option:hover {
+            border-color: var(--primary-light);
+        }
+
+        .size-option.selected {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            max-width: 400px;
+            width: calc(100% - 32px);
+        }
+
+        .notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 18px;
+        }
+
+        .notification-success .notification-icon {
+            background: rgba(46, 213, 115, 0.15);
+            color: var(--success);
+        }
+
+        .notification-warning .notification-icon {
+            background: rgba(255, 165, 2, 0.15);
+            color: var(--warning);
+        }
+
+        .notification-error .notification-icon {
+            background: rgba(255, 71, 87, 0.15);
+            color: var(--danger);
+        }
+
+        .notification-info .notification-icon {
+            background: rgba(51, 102, 255, 0.15);
+            color: var(--primary);
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 14px;
+            color: var(--gray-1);
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: var(--gray-2);
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 8px;
+        }
+
+        /* Загрузчик */
+        .loader {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(51, 102, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 380px) {
+            .container {
+                padding: 12px;
+                padding-bottom: 70px;
+            }
+            
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .size-guide-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .time-slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Экран авторизации -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-card">
+            <div class="login-logo">
+                <div class="logo-icon">
+                    <i class="fas fa-tshirt"></i>
+                </div>
+                <div class="logo-text">UniformFlow</div>
+                <div class="logo-subtext">Учет рабочей формы</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="input-label">Табельный номер</label>
+                <input type="text" id="employeeId" class="input-field" placeholder="Введите 6 цифр" autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label class="input-label">Пароль</label>
+                <input type="password" id="password" class="input-field" placeholder="Введите пароль">
+            </div>
+            
+            <button id="loginBtn" class="btn btn-primary btn-block">
+                <span id="loginBtnText">Войти в систему</span>
+                <div id="loginLoader" class="loader hidden"></div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Основное приложение -->
+    <div id="mainApp" class="hidden">
+        <!-- Шапка -->
+        <div class="header">
+            <div class="header-content">
+                <div>
+                    <div class="app-title" id="headerTitle">Главная</div>
+                    <div class="app-subtitle" id="headerSubtitle">Можно заменить</div>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button id="logoutBtn" class="btn btn-icon" style="background: rgba(255,255,255,0.15); color: white;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Контент -->
+        <div class="container">
+            <!-- Главная страница -->
+            <div id="homeScreen">
+                <div class="welcome-section">
+                    <div class="welcome-title" id="welcomeTitle">Добро пожаловать</div>
+                    <div class="welcome-subtitle" id="welcomeSubtitle">Анна Петрова</div>
+                </div>
+
+                <div class="quick-actions">
+                    <a href="#" class="quick-action quick-action-primary" id="quickSizeGuide">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-ruler-combined"></i>
+                        </div>
+                        <div class="quick-action-title">Размеры</div>
+                        <div class="quick-action-subtitle">Размерная сетка</div>
+                    </a>
+                    
+                    <a href="#" class="quick-action quick-action-warning" id="quickDamage">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="quick-action-title">Замена</div>
+                        <div class="quick-action-subtitle">Порча / утрата</div>
+                    </a>
+                    
+                    <a href="#" class="quick-action quick-action-success" id="quickReplacementTerms">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="quick-action-title">Сроки</div>
+                        <div class="quick-action-subtitle">Замены</div>
+                    </a>
+                    
+                    <a href="#" class="quick-action quick-action-danger" id="quickDismissal">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-user-slash"></i>
+                        </div>
+                        <div class="quick-action-title">Увольнение</div>
+                        <div class="quick-action-subtitle">Сдать форму</div>
+                    </a>
+                </div>
+
+                <div class="card">
+                    <div class="replacement-header">
+                        <div>
+                            <div class="card-title">Форменные элементы</div>
+                            <div class="card-subtitle">Элементы с истекшим сроком носки</div>
+                        </div>
+                        <button id="selectAllBtn" class="btn btn-outline">
+                            <i class="fas fa-check-double"></i> Выбрать все
+                        </button>
+                    </div>
+                    
+                    <div id="replacementItems" class="uniform-list">
+                        <!-- Будет заполнено через JS -->
+                    </div>
+                    
+                    <div id="noReplacementItems" class="hidden" style="text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 48px; color: var(--gray-2); margin-bottom: 16px;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="card-title" style="margin-bottom: 8px;">Нет элементов для замены</div>
+                        <div class="card-subtitle">Все элементы формы в порядке</div>
+                    </div>
+                    
+                    <div id="selectedItemsActions" class="hidden" style="margin-top: 20px; display: flex; gap: 12px;">
+                        <button id="addSelectedToCartBtn" class="btn btn-primary btn-block">
+                            <i class="fas fa-cart-plus"></i> Добавить выбранное в корзину
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сроки замены -->
+            <div id="replacementTermsScreen" class="hidden">
+                <div class="card">
+                    <div class="card-title">Сроки замены элементов</div>
+                    <div class="card-subtitle">Все элементы отсортированы по дате замены</div>
+                </div>
+                
+                <div id="replacementTermsList" class="replacement-terms-list">
+                    <!-- Будет заполнено через JS -->
+                </div>
+            </div>
+
+            <!-- Размерная сетка -->
+            <div id="sizeGuideScreen" class="hidden">
+                <div class="card">
+                    <div class="card-title">Размерная сетка</div>
+                    <div class="card-subtitle">Определите размер по вашим параметрам</div>
+                </div>
+                
+                <div class="size-guide-container">
+                    <div class="size-card" data-type="jacket">
+                        <div class="size-icon">
+                            <i class="fas fa-jacket"></i>
+                        </div>
+                        <div class="size-title">Жакет</div>
+                        <div class="card-subtitle">Ваш размер: <strong id="currentJacketSize">44</strong></div>
+                    </div>
+                    
+                    <div class="size-card" data-type="dress">
+                        <div class="size-icon">
+                            <i class="fas fa-tshirt"></i>
+                        </div>
+                        <div class="size-title">Платье</div>
+                        <div class="card-subtitle">Ваш размер: <strong id="currentDressSize">46</strong></div>
+                    </div>
+                    
+                    <div class="size-card" data-type="pants">
+                        <div class="size-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="size-title">Брюки</div>
+                        <div class="card-subtitle">Ваш размер: <strong id="currentPantsSize">46</strong></div>
+                    </div>
+                    
+                    <div class="size-card" data-type="shoes">
+                        <div class="size-icon">
+                            <i class="fas fa-shoe-prints"></i>
+                        </div>
+                        <div class="size-title">Обувь</div>
+                        <div class="card-subtitle">Ваш размер: <strong id="currentShoesSize">37</strong></div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Определить размер</div>
+                    <div class="card-subtitle">Введите свои параметры для расчета</div>
+                    
+                    <div class="form-group">
+                        <label class="input-label">Тип одежды</label>
+                        <select id="clothingType" class="input-field">
+                            <option value="jacket">Жакет</option>
+                            <option value="dress">Платье</option>
+                            <option value="pants">Брюки</option>
+                            <option value="shoes">Обувь</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label class="input-label">Рост (см)</label>
+                            <input type="number" id="heightInput" class="input-field" placeholder="165">
+                        </div>
+                        <div class="form-group">
+                            <label class="input-label">Обхват груди (см)</label>
+                            <input type="number" id="chestInput" class="input-field" placeholder="88">
+                        </div>
+                        <div class="form-group">
+                            <label class="input-label">Обхват талии (см)</label>
+                            <input type="number" id="waistInput" class="input-field" placeholder="70">
+                        </div>
+                        <div class="form-group">
+                            <label class="input-label">Обхват бедер (см)</label>
+                            <input type="number" id="hipsInput" class="input-field" placeholder="94">
+                        </div>
+                    </div>
+                    
+                    <button id="calculateSizeBtn" class="btn btn-primary btn-block">
+                        <i class="fas fa-calculator"></i> Рассчитать размер
+                    </button>
+                    
+                    <div id="sizeResult" class="hidden" style="margin-top: 20px; padding: 16px; background: var(--primary-light); border-radius: var(--radius-sm);">
+                        <div class="card-title">Рекомендуемый размер: <span id="recommendedSize">-</span></div>
+                        <div class="card-subtitle">На основе введенных параметров</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title">Таблица размеров (женская одежда)</div>
+                    <table class="size-table">
+                        <thead>
+                            <tr>
+                                <th>Размер</th>
+                                <th>Рост</th>
+                                <th>Грудь</th>
+                                <th>Талия</th>
+                                <th>Бедра</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sizeTableBody">
+                            <!-- Будет заполнено через JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Корзина -->
+            <div id="cartScreen" class="hidden">
+                <div class="card">
+                    <div class="card-title">Корзина</div>
+                    <div class="card-subtitle" id="cartCount">0 товаров</div>
+                </div>
+                
+                <div id="cartItems" class="cart-items">
+                    <!-- Будет заполнено через JS -->
+                </div>
+                
+                <div id="emptyCart" class="card" style="text-align: center; padding: 40px 20px;">
+                    <div style="font-size: 48px; color: var(--gray-2); margin-bottom: 16px;">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="card-title" style="margin-bottom: 8px;">Корзина пуста</div>
+                    <div class="card-subtitle">Добавьте элементы для замены</div>
+                </div>
+                
+                <div id="cartSummary" class="hidden">
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span>Товаров в корзине:</span>
+                            <span id="totalItemsCount">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--gray-3);">
+                            <span>Всего к получению:</span>
+                            <span id="totalToReceive">0 позиций</span>
+                        </div>
+                        
+                        <button id="bookAppointmentBtn" class="btn btn-success btn-block" style="margin-bottom: 12px;">
+                            <i class="fas fa-calendar-alt"></i> Записаться на получение
+                        </button>
+                        
+                        <button id="clearCartBtn" class="btn btn-outline btn-block">
+                            <i class="fas fa-trash"></i> Очистить корзину
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-title">Дополнительные услуги</div>
+                        <div class="card-subtitle">Специальные процедуры для сотрудников</div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px;">
+                            <button id="dismissalServiceBtn" class="btn btn-danger">
+                                <i class="fas fa-user-slash"></i> Сдача формы при увольнении
+                            </button>
+                            <button id="accountingServiceBtn" class="btn btn-warning">
+                                <i class="fas fa-file-invoice-dollar"></i> Замена по согласованию
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Нижняя навигация -->
+        <div class="tab-bar">
+            <a href="#" class="tab-item active" data-screen="home">
+                <div class="tab-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <span>Главная</span>
+            </a>
+            <a href="#" class="tab-item" data-screen="replacementTerms">
+                <div class="tab-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <span>Сроки</span>
+            </a>
+            <a href="#" class="tab-item" data-screen="sizeGuide">
+                <div class="tab-icon">
+                    <i class="fas fa-ruler-combined"></i>
+                </div>
+                <span>Размеры</span>
+            </a>
+            <a href="#" class="tab-item" data-screen="cart">
+                <div class="tab-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <span>Корзина</span>
+                <span id="cartBadge" class="badge badge-primary hidden" style="position: absolute; top: 4px; right: calc(25% - 10px);">0</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Модальные окна -->
+    
+    <!-- Запись на прием -->
+    <div id="appointmentModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Запись на получение</div>
+                <button class="modal-close" id="closeAppointmentModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="input-label">Тип услуги</label>
+                    <select id="serviceType" class="input-field">
+                        <option value="damage">Замена порча/утрата</option>
+                        <option value="dismissal">Сдача формы при увольнении</option>
+                        <option value="accounting">Замена по согласованию</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="input-label">Выберите дату</label>
+                    <div class="calendar-header">
+                        <button class="calendar-nav-btn" id="prevMonth">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="calendar-month" id="currentMonth">Май 2024</div>
+                        <button class="calendar-nav-btn" id="nextMonth">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <table class="calendar" id="calendarTable">
+                        <thead>
+                            <tr>
+                                <th>Пн</th>
+                                <th>Вт</th>
+                                <th>Ср</th>
+                                <th>Чт</th>
+                                <th>Пт</th>
+                                <th>Сб</th>
+                                <th>Вс</th>
+                            </tr>
+                        </thead>
+                        <tbody id="calendarBody">
+                            <!-- Календарь будет заполнен через JS -->
+                        </tbody>
+                    </table>
+                    <div id="selectedDateInfo" class="hidden" style="padding: 8px; background: var(--primary-light); border-radius: var(--radius-sm); text-align: center; margin-top: 8px;">
+                        <i class="fas fa-calendar-check" style="color: var(--primary); margin-right: 8px;"></i>
+                        Выбрана дата: <strong id="selectedDateText"></strong>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="input-label">Выберите время</label>
+                    <div id="timeSlots" class="time-slots">
+                        <!-- Временные слоты будут добавлены через JS -->
+                    </div>
+                    <div id="noTimeSlots" class="hidden" style="text-align: center; padding: 20px; color: var(--gray-1);">
+                        <i class="fas fa-clock" style="font-size: 24px; margin-bottom: 8px;"></i>
+                        <div>Выберите дату для отображения доступного времени</div>
+                    </div>
+                    <div id="selectedTimeInfo" class="hidden" style="padding: 8px; background: var(--primary-light); border-radius: var(--radius-sm); text-align: center; margin-top: 8px;">
+                        <i class="fas fa-clock" style="color: var(--primary); margin-right: 8px;"></i>
+                        Выбрано время: <strong id="selectedTimeText"></strong>
+                    </div>
+                </div>
+                
+                <div id="damageWarning" class="hidden" style="padding: 12px; background: rgba(255, 165, 2, 0.15); border-radius: var(--radius-sm); margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
+                        <div style="font-weight: 600; color: var(--warning);">Важная информация</div>
+                    </div>
+                    <div style="font-size: 14px; color: var(--gray-1);">
+                        Замена при порче или утрате производится только при наличии согласования с бухгалтерией. 
+                        Пожалуйста, убедитесь, что у вас есть подтверждение.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelAppointmentBtn" class="btn btn-outline">Отмена</button>
+                <button id="confirmAppointmentBtn" class="btn btn-primary" disabled>Записаться</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Изменение размера -->
+    <div id="sizeModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Изменение размера</div>
+                <button class="modal-close" id="closeSizeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="input-label">Элемент формы</label>
+                    <div id="sizeModalItemName" style="font-weight: 600; padding: 8px 0;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="input-label">Текущий размер</label>
+                    <div id="currentSizeDisplay" style="font-size: 18px; font-weight: 600; color: var(--primary); padding: 8px 0;"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="input-label">Выберите новый размер</label>
+                    <div id="sizeOptions" class="size-modal-options">
+                        <!-- Будет заполнено через JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelSizeBtn" class="btn btn-outline">Отмена</button>
+                <button id="saveSizeBtn" class="btn btn-primary">Сохранить размер</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Замена по согласованию -->
+    <div id="accountingModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Замена по согласованию с бухгалтерией</div>
+                <button class="modal-close" id="closeAccountingModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="input-label">Выберите элемент для замены</label>
+                    <select id="itemForReplacement" class="input-field">
+                        <option value="">-- Выберите элемент --</option>
+                        <!-- Будет заполнено через JS -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="input-label">Причина замены</label>
+                    <select id="replacementReason" class="input-field">
+                        <option value="damage">Повреждение в процессе работы</option>
+                        <option value="loss">Утрата элемента формы</option>
+                        <option value="size_change">Изменение размера</option>
+                        <option value="quality">Бракованный товар</option>
+                        <option value="other">Другая причина</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="input-label">Номер согласования бухгалтерии</label>
+                    <input type="text" id="accountingNumber" class="input-field" placeholder="Введите номер документа">
+                </div>
+                
+                <div class="form-group">
+                    <label class="input-label">Дата согласования</label>
+                    <input type="date" id="accountingDate" class="input-field">
+                </div>
+                
+                <div class="form-group">
+                    <label class="input-label">Комментарий (необязательно)</label>
+                    <textarea id="replacementComment" class="input-field" rows="3" placeholder="Дополнительная информация..."></textarea>
+                </div>
+                
+                <div style="padding: 12px; background: var(--primary-light); border-radius: var(--radius-sm); margin-bottom: 20px;">
+                    <div style="font-weight: 600; color: var(--primary); margin-bottom: 4px;">Информация</div>
+                    <div style="font-size: 14px; color: var(--gray-1);">
+                        Замена будет произведена только после проверки документов сотрудником склада.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelAccountingBtn" class="btn btn-outline">Отмена</button>
+                <button id="submitAccountingBtn" class="btn btn-primary">Отправить заявку</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Увольнение -->
+    <div id="dismissalModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Сдача формы при увольнении</div>
+                <button class="modal-close" id="closeDismissalModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="padding: 16px; background: rgba(255, 71, 87, 0.1); border-radius: var(--radius-sm); margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <i class="fas fa-exclamation-circle" style="color: var(--danger);"></i>
+                        <div style="font-weight: 600; color: var(--danger);">Внимание!</div>
+                    </div>
+                    <div style="font-size: 14px; color: var(--gray-1);">
+                        При увольнении необходимо сдать ВСЮ выданную вам рабочую форму. 
+                        В случае неполной сдачи формы могут быть удержания из расчета.
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="input-label">Дата увольнения</label>
+                    <input type="date" id="dismissalDate" class="input-field">
+                </div>
+                
+                <div class="form-group">
+                    <label class="input-label">Планируемая дата сдачи формы</label>
+                    <input type="date" id="returnDate" class="input-field">
+                </div>
+                
+                <div class="form-group">
+                    <label class="input-label">Комментарий (необязательно)</label>
+                    <textarea id="dismissalComment" class="input-field" rows="3" placeholder="Дополнительная информация..."></textarea>
+                </div>
+                
+                <div id="issuedItemsList">
+                    <!-- Будет заполнено через JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelDismissalBtn" class="btn btn-outline">Отмена</button>
+                <button id="submitDismissalBtn" class="btn btn-danger">Записаться на сдачу</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомление -->
+    <div id="notification" class="notification hidden">
+        <div class="notification-icon" id="notificationIcon">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="notification-content">
+            <div class="notification-title" id="notificationTitle">Уведомление</div>
+            <div class="notification-message" id="notificationMessage">Сообщение</div>
+        </div>
+        <button class="notification-close" id="closeNotification">&times;</button>
+    </div>
+
+    <script>
+        // Глобальные переменные и состояние
+        const State = {
+            user: null,
+            cart: [],
+            selectedItems: [],
+            currentScreen: 'home',
+            notificationTimeout: null,
+            currentSizeItem: null,
+            calendar: {
+                currentDate: new Date(),
+                selectedDate: null,
+                selectedTime: null
+            }
+        };
+
+        // Данные приложения
+        const AppData = {
+            uniforms: [
+                {
+                    id: 1,
+                    name: 'Перчатки',
+                    category: 'accessories',
+                    description: 'Кожаные перчатки рабочие',
+                    replacementPeriod: 6,
+                    lastIssued: '2023-01-15',
+                    nextReplacement: '2023-07-15',
+                    sizes: ['S', 'M', 'L'],
+                    availableSizes: ['S', 'M', 'L'],
+                    inStock: 24,
+                    userSize: 'M',
+                    needsReplacement: true,
+                    canReplace: true,
+                    daysUntilReplacement: 0,
+                    status: 'Замена'
+                },
+                {
+                    id: 2,
+                    name: 'Пилотка',
+                    category: 'accessories',
+                    description: 'Пилотка форменная',
+                    replacementPeriod: 12,
+                    lastIssued: '2022-08-20',
+                    nextReplacement: '2023-08-20',
+                    sizes: ['Универсальный'],
+                    availableSizes: ['Универсальный'],
+                    inStock: 18,
+                    userSize: 'Универсальный',
+                    needsReplacement: true,
+                    canReplace: true,
+                    daysUntilReplacement: 0,
+                    status: 'Замена'
+                },
+                {
+                    id: 3,
+                    name: 'Платок шейный',
+                    category: 'accessories',
+                    description: 'Шейный платок форменный',
+                    replacementPeriod: 6,
+                    lastIssued: '2023-03-01',
+                    nextReplacement: '2023-09-01',
+                    sizes: ['Универсальный'],
+                    availableSizes: ['Универсальный'],
+                    inStock: 32,
+                    userSize: 'Универсальный',
+                    needsReplacement: false,
+                    canReplace: false,
+                    daysUntilReplacement: 120,
+                    status: 'Ожидание'
+                },
+                {
+                    id: 4,
+                    name: 'Фартук',
+                    category: 'accessories',
+                    description: 'Фартук рабочий защитный',
+                    replacementPeriod: 12,
+                    lastIssued: '2022-12-01',
+                    nextReplacement: '2023-12-01',
+                    sizes: ['Универсальный'],
+                    availableSizes: ['Универсальный'],
+                    inStock: 15,
+                    userSize: 'Универсальный',
+                    needsReplacement: true,
+                    canReplace: true,
+                    daysUntilReplacement: 0,
+                    status: 'Замена'
+                },
+                {
+                    id: 5,
+                    name: 'Жакет женский',
+                    category: 'jacket',
+                    description: 'Жакет форменный женский',
+                    replacementPeriod: 24,
+                    lastIssued: '2021-11-10',
+                    nextReplacement: '2023-11-10',
+                    sizes: ['42', '44', '46', '48', '50'],
+                    availableSizes: ['42', '44', '46', '48'],
+                    inStock: 12,
+                    userSize: '44',
+                    needsReplacement: true,
+                    canReplace: true,
+                    daysUntilReplacement: 0,
+                    status: 'Замена'
+                },
+                {
+                    id: 6,
+                    name: 'Платье женское',
+                    category: 'dress',
+                    description: 'Платье форменное женское',
+                    replacementPeriod: 18,
+                    lastIssued: '2022-08-20',
+                    nextReplacement: '2024-02-20',
+                    sizes: ['42', '44', '46', '48', '50'],
+                    availableSizes: ['44', '46', '48'],
+                    inStock: 18,
+                    userSize: '46',
+                    needsReplacement: false,
+                    canReplace: false,
+                    daysUntilReplacement: 150,
+                    status: 'Ожидание'
+                },
+                {
+                    id: 7,
+                    name: 'Брюки женские',
+                    category: 'pants',
+                    description: 'Брюки форменные женские',
+                    replacementPeriod: 18,
+                    lastIssued: '2022-09-15',
+                    nextReplacement: '2024-03-15',
+                    sizes: ['42', '44', '46', '48', '50'],
+                    availableSizes: ['44', '46', '48'],
+                    inStock: 20,
+                    userSize: '46',
+                    needsReplacement: false,
+                    canReplace: false,
+                    daysUntilReplacement: 180,
+                    status: 'Ожидание'
+                },
+                {
+                    id: 8,
+                    name: 'Туфли',
+                    category: 'shoes',
+                    description: 'Туфли офисные женские',
+                    replacementPeriod: 12,
+                    lastIssued: '2023-03-01',
+                    nextReplacement: '2024-03-01',
+                    sizes: ['35', '36', '37', '38', '39'],
+                    availableSizes: ['36', '37', '38'],
+                    inStock: 25,
+                    userSize: '37',
+                    needsReplacement: false,
+                    canReplace: false,
+                    daysUntilReplacement: 200,
+                    status: 'Ожидание'
+                },
+                {
+                    id: 9,
+                    name: 'Сапоги',
+                    category: 'shoes',
+                    description: 'Сапоги зимние рабочие',
+                    replacementPeriod: 24,
+                    lastIssued: '2021-10-01',
+                    nextReplacement: '2023-10-01',
+                    sizes: ['35', '36', '37', '38', '39'],
+                    availableSizes: ['36', '37', '38'],
+                    inStock: 10,
+                    userSize: '37',
+                    needsReplacement: true,
+                    canReplace: true,
+                    daysUntilReplacement: 0,
+                    status: 'Замена'
+                },
+                {
+                    id: 10,
+                    name: 'Пальто',
+                    category: 'coat',
+                    description: 'Пальто форменное зимнее',
+                    replacementPeriod: 36,
+                    lastIssued: '2020-09-01',
+                    nextReplacement: '2023-09-01',
+                    sizes: ['42', '44', '46', '48', '50'],
+                    availableSizes: ['44', '46', '48'],
+                    inStock: 8,
+                    userSize: '44',
+                    needsReplacement: true,
+                    canReplace: true,
+                    daysUntilReplacement: 0,
+                    status: 'Замена'
+                },
+                {
+                    id: 11,
+                    name: 'Куртка зимняя',
+                    category: 'jacket',
+                    description: 'Куртка зимняя утепленная',
+                    replacementPeriod: 24,
+                    lastIssued: '2021-11-10',
+                    nextReplacement: '2023-11-10',
+                    sizes: ['42', '44', '46', '48', '50'],
+                    availableSizes: ['44', '46', '48'],
+                    inStock: 12,
+                    userSize: '44',
+                    needsReplacement: true,
+                    canReplace: true,
+                    daysUntilReplacement: 0,
+                    status: 'Замена'
+                }
+            ],
+            
+            userSizes: {
+                jacket: '44',
+                dress: '46',
+                pants: '46',
+                shoes: '37',
+                accessories: 'Универсальный',
+                coat: '44'
+            },
+            
+            appointments: [],
+            
+            history: [
+                {
+                    date: '2023-01-15',
+                    item: 'Перчатки',
+                    size: 'M',
+                    action: 'выдано'
+                },
+                {
+                    date: '2022-08-20',
+                    item: 'Пилотка',
+                    size: 'Универсальный',
+                    action: 'выдано'
+                },
+                {
+                    date: '2021-11-10',
+                    item: 'Жакет женский',
+                    size: '44',
+                    action: 'выдано'
+                }
+            ],
+            
+            timeSlots: [
+                '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+                '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
+                '15:00', '15:30', '16:00', '16:30', '17:00', '17:30'
+            ],
+            
+            // Занятые слоты времени по датам (для демонстрации)
+            bookedSlots: {
+                '2024-05-15': ['09:00', '10:30', '14:00'],
+                '2024-05-16': ['11:00', '13:30', '16:00'],
+                '2024-05-17': ['10:00', '15:30']
+            }
+        };
+
+        // DOM элементы
+        const elements = {
+            loginScreen: document.getElementById('loginScreen'),
+            mainApp: document.getElementById('mainApp'),
+            loginBtn: document.getElementById('loginBtn'),
+            loginBtnText: document.getElementById('loginBtnText'),
+            loginLoader: document.getElementById('loginLoader'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            
+            tabItems: document.querySelectorAll('.tab-item'),
+            headerTitle: document.getElementById('headerTitle'),
+            headerSubtitle: document.getElementById('headerSubtitle'),
+            
+            homeScreen: document.getElementById('homeScreen'),
+            replacementTermsScreen: document.getElementById('replacementTermsScreen'),
+            sizeGuideScreen: document.getElementById('sizeGuideScreen'),
+            cartScreen: document.getElementById('cartScreen'),
+            
+            welcomeTitle: document.getElementById('welcomeTitle'),
+            welcomeSubtitle: document.getElementById('welcomeSubtitle'),
+            
+            quickSizeGuide: document.getElementById('quickSizeGuide'),
+            quickDamage: document.getElementById('quickDamage'),
+            quickReplacementTerms: document.getElementById('quickReplacementTerms'),
+            quickDismissal: document.getElementById('quickDismissal'),
+            
+            replacementItems: document.getElementById('replacementItems'),
+            noReplacementItems: document.getElementById('noReplacementItems'),
+            selectAllBtn: document.getElementById('selectAllBtn'),
+            selectedItemsActions: document.getElementById('selectedItemsActions'),
+            addSelectedToCartBtn: document.getElementById('addSelectedToCartBtn'),
+            
+            replacementTermsList: document.getElementById('replacementTermsList'),
+            
+            currentJacketSize: document.getElementById('currentJacketSize'),
+            currentDressSize: document.getElementById('currentDressSize'),
+            currentPantsSize: document.getElementById('currentPantsSize'),
+            currentShoesSize: document.getElementById('currentShoesSize'),
+            
+            clothingType: document.getElementById('clothingType'),
+            heightInput: document.getElementById('heightInput'),
+            chestInput: document.getElementById('chestInput'),
+            waistInput: document.getElementById('waistInput'),
+            hipsInput: document.getElementById('hipsInput'),
+            calculateSizeBtn: document.getElementById('calculateSizeBtn'),
+            sizeResult: document.getElementById('sizeResult'),
+            recommendedSize: document.getElementById('recommendedSize'),
+            sizeTableBody: document.getElementById('sizeTableBody'),
+            
+            cartCount: document.getElementById('cartCount'),
+            cartItems: document.getElementById('cartItems'),
+            emptyCart: document.getElementById('emptyCart'),
+            cartSummary: document.getElementById('cartSummary'),
+            totalItemsCount: document.getElementById('totalItemsCount'),
+            totalToReceive: document.getElementById('totalToReceive'),
+            bookAppointmentBtn: document.getElementById('bookAppointmentBtn'),
+            clearCartBtn: document.getElementById('clearCartBtn'),
+            dismissalServiceBtn: document.getElementById('dismissalServiceBtn'),
+            accountingServiceBtn: document.getElementById('accountingServiceBtn'),
+            cartBadge: document.getElementById('cartBadge'),
+            
+            appointmentModal: document.getElementById('appointmentModal'),
+            closeAppointmentModal: document.getElementById('closeAppointmentModal'),
+            cancelAppointmentBtn: document.getElementById('cancelAppointmentBtn'),
+            confirmAppointmentBtn: document.getElementById('confirmAppointmentBtn'),
+            serviceType: document.getElementById('serviceType'),
+            damageWarning: document.getElementById('damageWarning'),
+            calendarTable: document.getElementById('calendarTable'),
+            calendarBody: document.getElementById('calendarBody'),
+            currentMonth: document.getElementById('currentMonth'),
+            prevMonth: document.getElementById('prevMonth'),
+            nextMonth: document.getElementById('nextMonth'),
+            timeSlots: document.getElementById('timeSlots'),
+            noTimeSlots: document.getElementById('noTimeSlots'),
+            selectedDateInfo: document.getElementById('selectedDateInfo'),
+            selectedDateText: document.getElementById('selectedDateText'),
+            selectedTimeInfo: document.getElementById('selectedTimeInfo'),
+            selectedTimeText: document.getElementById('selectedTimeText'),
+            
+            sizeModal: document.getElementById('sizeModal'),
+            closeSizeModal: document.getElementById('closeSizeModal'),
+            cancelSizeBtn: document.getElementById('cancelSizeBtn'),
+            saveSizeBtn: document.getElementById('saveSizeBtn'),
+            sizeModalItemName: document.getElementById('sizeModalItemName'),
+            currentSizeDisplay: document.getElementById('currentSizeDisplay'),
+            sizeOptions: document.getElementById('sizeOptions'),
+            
+            accountingModal: document.getElementById('accountingModal'),
+            closeAccountingModal: document.getElementById('closeAccountingModal'),
+            cancelAccountingBtn: document.getElementById('cancelAccountingBtn'),
+            submitAccountingBtn: document.getElementById('submitAccountingBtn'),
+            itemForReplacement: document.getElementById('itemForReplacement'),
+            
+            dismissalModal: document.getElementById('dismissalModal'),
+            closeDismissalModal: document.getElementById('closeDismissalModal'),
+            cancelDismissalBtn: document.getElementById('cancelDismissalBtn'),
+            submitDismissalBtn: document.getElementById('submitDismissalBtn'),
+            dismissalDate: document.getElementById('dismissalDate'),
+            returnDate: document.getElementById('returnDate'),
+            issuedItemsList: document.getElementById('issuedItemsList'),
+            
+            notification: document.getElementById('notification'),
+            notificationIcon: document.getElementById('notificationIcon'),
+            notificationTitle: document.getElementById('notificationTitle'),
+            notificationMessage: document.getElementById('notificationMessage'),
+            closeNotification: document.getElementById('closeNotification')
+        };
+
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', () => {
+            initApp();
+            bindEvents();
+        });
+
+        function initApp() {
+            // Проверяем сохраненную сессию
+            const savedUser = localStorage.getItem('uniformApp_user');
+            if (savedUser) {
+                State.user = JSON.parse(savedUser);
+                showMainApp();
+                updateUI();
+            }
+            
+            // Загружаем корзину из localStorage
+            const savedCart = localStorage.getItem('uniformApp_cart');
+            if (savedCart) {
+                State.cart = JSON.parse(savedCart);
+            }
+            
+            // Инициализируем таблицу размеров
+            renderSizeTable();
+            
+            // Устанавливаем текущую дату в форме увольнения
+            const today = new Date();
+            const nextWeek = new Date(today);
+            nextWeek.setDate(today.getDate() + 7);
+            
+            elements.dismissalDate.valueAsDate = today;
+            elements.returnDate.valueAsDate = nextWeek;
+            
+            // Заполняем элементы для замены по согласованию
+            renderReplacementItems();
+            
+            // Заполняем выданные элементы для увольнения
+            renderIssuedItems();
+            
+            // Инициализируем календарь
+            updateCalendar();
+        }
+
+        function bindEvents() {
+            // Авторизация
+            elements.loginBtn.addEventListener('click', handleLogin);
+            elements.logoutBtn.addEventListener('click', handleLogout);
+            
+            // Навигация
+            elements.tabItems.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const screen = tab.dataset.screen;
+                    switchScreen(screen);
+                    
+                    elements.tabItems.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                });
+            });
+            
+            // Быстрые действия
+            elements.quickSizeGuide.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchScreen('sizeGuide');
+                elements.tabItems.forEach(t => t.classList.remove('active'));
+                document.querySelector('[data-screen="sizeGuide"]').classList.add('active');
+            });
+            
+            elements.quickDamage.addEventListener('click', (e) => {
+                e.preventDefault();
+                showDamageReplacementModal();
+            });
+            
+            elements.quickReplacementTerms.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchScreen('replacementTerms');
+                elements.tabItems.forEach(t => t.classList.remove('active'));
+                document.querySelector('[data-screen="replacementTerms"]').classList.add('active');
+            });
+            
+            elements.quickDismissal.addEventListener('click', (e) => {
+                e.preventDefault();
+                showDismissalModal();
+            });
+            
+            // Главная страница
+            elements.selectAllBtn.addEventListener('click', selectAllItems);
+            elements.addSelectedToCartBtn.addEventListener('click', addSelectedToCart);
+            
+            // Размерная сетка
+            elements.calculateSizeBtn.addEventListener('click', calculateSize);
+            
+            // Корзина
+            elements.clearCartBtn.addEventListener('click', clearCart);
+            elements.bookAppointmentBtn.addEventListener('click', showAppointmentModal);
+            elements.dismissalServiceBtn.addEventListener('click', showDismissalModal);
+            elements.accountingServiceBtn.addEventListener('click', showAccountingModal);
+            
+            // Модальные окна
+            elements.closeAppointmentModal.addEventListener('click', () => hideModal('appointmentModal'));
+            elements.cancelAppointmentBtn.addEventListener('click', () => hideModal('appointmentModal'));
+            elements.confirmAppointmentBtn.addEventListener('click', confirmAppointment);
+            
+            // Календарь
+            elements.prevMonth.addEventListener('click', () => {
+                State.calendar.currentDate.setMonth(State.calendar.currentDate.getMonth() - 1);
+                updateCalendar();
+            });
+            
+            elements.nextMonth.addEventListener('click', () => {
+                State.calendar.currentDate.setMonth(State.calendar.currentDate.getMonth() + 1);
+                updateCalendar();
+            });
+            
+            elements.closeSizeModal.addEventListener('click', () => hideModal('sizeModal'));
+            elements.cancelSizeBtn.addEventListener('click', () => hideModal('sizeModal'));
+            elements.saveSizeBtn.addEventListener('click', saveSize);
+            
+            elements.closeAccountingModal.addEventListener('click', () => hideModal('accountingModal'));
+            elements.cancelAccountingBtn.addEventListener('click', () => hideModal('accountingModal'));
+            elements.submitAccountingBtn.addEventListener('click', submitAccountingRequest);
+            
+            elements.closeDismissalModal.addEventListener('click', () => hideModal('dismissalModal'));
+            elements.cancelDismissalBtn.addEventListener('click', () => hideModal('dismissalModal'));
+            elements.submitDismissalBtn.addEventListener('click', submitDismissalRequest);
+            
+            // Уведомления
+            elements.closeNotification.addEventListener('click', hideNotification);
+            
+            // Изменение типа услуги в модальном окне
+            elements.serviceType.addEventListener('change', function() {
+                if (this.value === 'damage') {
+                    elements.damageWarning.classList.remove('hidden');
+                } else {
+                    elements.damageWarning.classList.add('hidden');
+                }
+            });
+        }
+
+        function handleLogin() {
+            const employeeId = document.getElementById('employeeId').value;
+            const password = document.getElementById('password').value;
+            
+            if (!employeeId || !password) {
+                showNotification('Ошибка', 'Заполните все поля', 'error');
+                return;
+            }
+            
+            // Проверяем табельный номер (6 цифр)
+            if (!/^\d{6}$/.test(employeeId)) {
+                showNotification('Ошибка', 'Табельный номер должен состоять из 6 цифр', 'error');
+                return;
+            }
+            
+            elements.loginBtnText.textContent = '';
+            elements.loginLoader.classList.remove('hidden');
+            
+            setTimeout(() => {
+                State.user = {
+                    id: employeeId,
+                    name: 'Анна Петрова',
+                    department: 'Эконом 1',
+                    position: 'Экономист'
+                };
+                
+                localStorage.setItem('uniformApp_user', JSON.stringify(State.user));
+                
+                showMainApp();
+                elements.loginBtnText.textContent = 'Войти в систему';
+                elements.loginLoader.classList.add('hidden');
+                
+                showNotification('Успешный вход', `Добро пожаловать, ${State.user.name}!`, 'success');
+            }, 1000);
+        }
+
+        function handleLogout() {
+            State.user = null;
+            State.cart = [];
+            State.selectedItems = [];
+            State.calendar.selectedDate = null;
+            State.calendar.selectedTime = null;
+            localStorage.removeItem('uniformApp_user');
+            localStorage.removeItem('uniformApp_cart');
+            
+            elements.loginScreen.classList.remove('hidden');
+            elements.mainApp.classList.add('hidden');
+            
+            document.getElementById('employeeId').value = '';
+            document.getElementById('password').value = '';
+            
+            showNotification('Выход', 'Вы вышли из системы', 'info');
+        }
+
+        function showMainApp() {
+            elements.loginScreen.classList.add('hidden');
+            elements.mainApp.classList.remove('hidden');
+            updateUI();
+        }
+
+        function switchScreen(screen) {
+            State.currentScreen = screen;
+            
+            [elements.homeScreen, elements.replacementTermsScreen, elements.sizeGuideScreen, elements.cartScreen]
+                .forEach(screen => screen.classList.add('hidden'));
+            
+            switch(screen) {
+                case 'home':
+                    elements.homeScreen.classList.remove('hidden');
+                    elements.headerTitle.textContent = 'Главная';
+                    elements.headerSubtitle.textContent = 'Можно заменить';
+                    updateHomeScreen();
+                    break;
+                case 'replacementTerms':
+                    elements.replacementTermsScreen.classList.remove('hidden');
+                    elements.headerTitle.textContent = 'Сроки замены';
+                    elements.headerSubtitle.textContent = 'Все элементы';
+                    renderReplacementTerms();
+                    break;
+                case 'sizeGuide':
+                    elements.sizeGuideScreen.classList.remove('hidden');
+                    elements.headerTitle.textContent = 'Размерная сетка';
+                    elements.headerSubtitle.textContent = 'Определение размеров';
+                    updateSizeGuide();
+                    break;
+                case 'cart':
+                    elements.cartScreen.classList.remove('hidden');
+                    elements.headerTitle.textContent = 'Корзина';
+                    elements.headerSubtitle.textContent = 'Выбранные товары';
+                    updateCart();
+                    break;
+            }
+        }
+
+        function updateUI() {
+            if (!State.user) return;
+            
+            elements.welcomeTitle.textContent = `Добро пожаловать`;
+            elements.welcomeSubtitle.textContent = State.user.name;
+            
+            updateHomeScreen();
+            updateCartBadge();
+        }
+
+        function updateHomeScreen() {
+            // Сортируем элементы: сначала со статусом "Замена", затем остальные
+            const sortedItems = [...AppData.uniforms].sort((a, b) => {
+                if (a.status === 'Замена' && b.status !== 'Замена') return -1;
+                if (a.status !== 'Замена' && b.status === 'Замена') return 1;
+                return a.daysUntilReplacement - b.daysUntilReplacement;
+            });
+            
+            elements.replacementItems.innerHTML = '';
+            State.selectedItems = [];
+            
+            // Фильтруем только активные элементы для выбора
+            const activeItems = sortedItems.filter(item => item.status === 'Замена');
+            
+            if (activeItems.length === 0) {
+                elements.noReplacementItems.classList.remove('hidden');
+                elements.selectedItemsActions.classList.add('hidden');
+            } else {
+                elements.noReplacementItems.classList.add('hidden');
+            }
+            
+            // Отображаем все элементы
+            sortedItems.forEach(item => {
+                const isActive = item.status === 'Замена';
+                const itemElement = document.createElement('div');
+                itemElement.className = `uniform-item ${isActive ? 'active' : 'inactive'}`;
+                itemElement.dataset.id = item.id;
+                itemElement.innerHTML = `
+                    ${isActive ? `
+                        <div class="checkbox-container">
+                            <div class="checkbox" data-id="${item.id}"></div>
+                        </div>
+                    ` : ''}
+                    <div class="uniform-item-icon">
+                        <i class="fas ${getCategoryIcon(item.category)}"></i>
+                    </div>
+                    <div class="uniform-item-content">
+                        <div class="uniform-item-name">${item.name}</div>
+                        <div class="uniform-item-details">
+                            <span>Размер: <span class="size-selector" data-id="${item.id}">${item.userSize} <i class="fas fa-pencil-alt" style="font-size: 12px;"></i></span></span>
+                            <span>•</span>
+                            <span>Последняя выдача: ${formatDate(item.lastIssued)}</span>
+                        </div>
+                    </div>
+                    <div class="uniform-item-actions">
+                        <span class="badge ${getStatusClass(item.status)}">${item.status}</span>
+                    </div>
+                `;
+                
+                elements.replacementItems.appendChild(itemElement);
+                
+                // Обработчик выбора элемента (только для активных)
+                if (isActive) {
+                    const checkbox = itemElement.querySelector('.checkbox');
+                    checkbox.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        checkbox.classList.toggle('checked');
+                        const itemId = parseInt(checkbox.dataset.id);
+                        
+                        if (checkbox.classList.contains('checked')) {
+                            if (!State.selectedItems.includes(itemId)) {
+                                State.selectedItems.push(itemId);
+                            }
+                        } else {
+                            const index = State.selectedItems.indexOf(itemId);
+                            if (index > -1) {
+                                State.selectedItems.splice(index, 1);
+                            }
+                        }
+                        
+                        updateSelectedItemsActions();
+                    });
+                }
+                
+                // Обработчик изменения размера (для всех элементов)
+                const sizeSelector = itemElement.querySelector('.size-selector');
+                sizeSelector.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const itemId = parseInt(sizeSelector.dataset.id);
+                    const item = AppData.uniforms.find(u => u.id === itemId);
+                    if (item) {
+                        showSizeModal(item);
+                    }
+                });
+                
+                // Обработчик клика по всей карточке (только для активных)
+                if (isActive) {
+                    itemElement.addEventListener('click', (e) => {
+                        if (e.target.closest('.checkbox') || e.target.closest('.size-selector')) {
+                            return;
+                        }
+                        const checkbox = itemElement.querySelector('.checkbox');
+                        checkbox.click();
+                    });
+                }
+            });
+            
+            updateSelectedItemsActions();
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'Замена': return 'badge-success';
+                case 'Ожидание': return 'badge-info';
+                case 'Неактивно': return 'badge-warning';
+                default: return 'badge-info';
+            }
+        }
+
+        function updateSelectedItemsActions() {
+            const activeItems = AppData.uniforms.filter(item => item.status === 'Замена');
+            if (State.selectedItems.length > 0) {
+                elements.selectedItemsActions.classList.remove('hidden');
+                elements.selectAllBtn.innerHTML = `<i class="fas fa-times"></i> Снять все`;
+            } else if (activeItems.length > 0) {
+                elements.selectedItemsActions.classList.add('hidden');
+                elements.selectAllBtn.innerHTML = `<i class="fas fa-check-double"></i> Выбрать все`;
+            } else {
+                elements.selectAllBtn.innerHTML = `<i class="fas fa-check-double"></i> Выбрать все`;
+            }
+        }
+
+        function selectAllItems() {
+            const activeItems = AppData.uniforms.filter(item => item.status === 'Замена');
+            const activeItemIds = activeItems.map(item => item.id);
+            const checkboxes = document.querySelectorAll('.checkbox');
+            
+            if (State.selectedItems.length === activeItemIds.length) {
+                // Если все уже выбраны, снимаем выделение
+                checkboxes.forEach(checkbox => {
+                    checkbox.classList.remove('checked');
+                });
+                State.selectedItems = [];
+            } else {
+                // Выбираем все активные
+                checkboxes.forEach(checkbox => {
+                    checkbox.classList.add('checked');
+                });
+                State.selectedItems = [...activeItemIds];
+            }
+            
+            updateSelectedItemsActions();
+        }
+
+        function addSelectedToCart() {
+            if (State.selectedItems.length === 0) {
+                showNotification('Ошибка', 'Выберите элементы для добавления в корзину', 'error');
+                return;
+            }
+            
+            State.selectedItems.forEach(itemId => {
+                const item = AppData.uniforms.find(u => u.id === itemId);
+                if (item && !State.cart.some(cartItem => cartItem.id === itemId)) {
+                    State.cart.push({
+                        id: item.id,
+                        name: item.name,
+                        size: item.userSize,
+                        category: item.category
+                    });
+                }
+            });
+            
+            localStorage.setItem('uniformApp_cart', JSON.stringify(State.cart));
+            updateCart();
+            updateCartBadge();
+            
+            showNotification('Добавлено', `${State.selectedItems.length} элементов добавлено в корзину`, 'success');
+            
+            // Сбрасываем выбор
+            State.selectedItems = [];
+            document.querySelectorAll('.checkbox').forEach(checkbox => {
+                checkbox.classList.remove('checked');
+            });
+            updateSelectedItemsActions();
+        }
+
+        function renderReplacementTerms() {
+            elements.replacementTermsList.innerHTML = '';
+            
+            // Сортируем по статусу и сроку замены
+            const sortedItems = [...AppData.uniforms].sort((a, b) => {
+                if (a.status === 'Замена' && b.status !== 'Замена') return -1;
+                if (a.status !== 'Замена' && b.status === 'Замена') return 1;
+                return a.daysUntilReplacement - b.daysUntilReplacement;
+            });
+            
+            sortedItems.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'replacement-term-item';
+                
+                let statusHtml, dateInfo;
+                
+                if (item.status === 'Замена') {
+                    statusHtml = `<div class="term-status status-replacement">${item.status}</div>`;
+                    dateInfo = `Можно заменить с ${formatDate(item.lastIssued)}`;
+                } else {
+                    const nextDate = new Date(item.lastIssued);
+                    nextDate.setMonth(nextDate.getMonth() + item.replacementPeriod);
+                    statusHtml = `<div class="term-status status-pending">${item.status}: ${item.daysUntilReplacement} дн.</div>`;
+                    dateInfo = `Следующая замена: ${formatDate(nextDate.toISOString().split('T')[0])}`;
+                }
+                
+                itemElement.innerHTML = `
+                    <div class="term-header">
+                        <div class="term-name">${item.name}</div>
+                        ${statusHtml}
+                    </div>
+                    <div class="term-details">
+                        <div class="term-detail">
+                            <div class="term-label">Размер</div>
+                            <div class="term-value">${item.userSize}</div>
+                        </div>
+                        <div class="term-detail">
+                            <div class="term-label">Срок носки</div>
+                            <div class="term-value">${item.replacementPeriod} мес.</div>
+                        </div>
+                        <div class="term-detail">
+                            <div class="term-label">Выдано</div>
+                            <div class="term-value">${formatDate(item.lastIssued)}</div>
+                        </div>
+                    </div>
+                    <div class="card-subtitle">${dateInfo}</div>
+                `;
+                
+                elements.replacementTermsList.appendChild(itemElement);
+            });
+        }
+
+        function updateSizeGuide() {
+            // Обновляем текущие размеры
+            elements.currentJacketSize.textContent = AppData.userSizes.jacket;
+            elements.currentDressSize.textContent = AppData.userSizes.dress;
+            elements.currentPantsSize.textContent = AppData.userSizes.pants;
+            elements.currentShoesSize.textContent = AppData.userSizes.shoes;
+            
+            // Обработчики для карточек размеров
+            document.querySelectorAll('.size-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    elements.clothingType.value = type;
+                    
+                    // Автозаполнение параметров для текущего типа
+                    switch(type) {
+                        case 'jacket':
+                            elements.heightInput.value = 165;
+                            elements.chestInput.value = 88;
+                            elements.waistInput.value = 70;
+                            elements.hipsInput.value = 94;
+                            break;
+                        case 'dress':
+                            elements.heightInput.value = 165;
+                            elements.chestInput.value = 88;
+                            elements.waistInput.value = 70;
+                            elements.hipsInput.value = 94;
+                            break;
+                        case 'pants':
+                            elements.heightInput.value = 165;
+                            elements.chestInput.value = '';
+                            elements.waistInput.value = 70;
+                            elements.hipsInput.value = 94;
+                            break;
+                        case 'shoes':
+                            elements.heightInput.value = 165;
+                            elements.chestInput.value = '';
+                            elements.waistInput.value = '';
+                            elements.hipsInput.value = '';
+                            break;
+                    }
+                });
+            });
+        }
+
+        function renderSizeTable() {
+            const sizeData = [
+                { size: '42', height: '158-164', chest: '82-86', waist: '64-68', hips: '88-92' },
+                { size: '44', height: '162-168', chest: '86-90', waist: '68-72', hips: '92-96' },
+                { size: '46', height: '166-172', chest: '90-94', waist: '72-76', hips: '96-100' },
+                { size: '48', height: '170-176', chest: '94-98', waist: '76-80', hips: '100-104' },
+                { size: '50', height: '174-180', chest: '98-102', waist: '80-84', hips: '104-108' }
+            ];
+            
+            elements.sizeTableBody.innerHTML = '';
+            
+            sizeData.forEach(data => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${data.size}</td>
+                    <td>${data.height}</td>
+                    <td>${data.chest}</td>
+                    <td>${data.waist}</td>
+                    <td>${data.hips}</td>
+                `;
+                
+                // Выделяем текущий размер пользователя
+                if (data.size === AppData.userSizes.jacket) {
+                    row.classList.add('current-size');
+                }
+                
+                elements.sizeTableBody.appendChild(row);
+            });
+        }
+
+        function calculateSize() {
+            const type = elements.clothingType.value;
+            const height = parseInt(elements.heightInput.value) || 0;
+            const chest = parseInt(elements.chestInput.value) || 0;
+            const waist = parseInt(elements.waistInput.value) || 0;
+            const hips = parseInt(elements.hipsInput.value) || 0;
+            
+            if (!height) {
+                showNotification('Ошибка', 'Введите рост', 'error');
+                return;
+            }
+            
+            let recommendedSize = '46';
+            
+            switch(type) {
+                case 'jacket':
+                case 'dress':
+                    if (chest < 86) recommendedSize = '42';
+                    else if (chest >= 86 && chest < 90) recommendedSize = '44';
+                    else if (chest >= 90 && chest < 94) recommendedSize = '46';
+                    else if (chest >= 94 && chest < 98) recommendedSize = '48';
+                    else if (chest >= 98) recommendedSize = '50';
+                    break;
+                case 'pants':
+                    if (hips < 92) recommendedSize = '42';
+                    else if (hips >= 92 && hips < 96) recommendedSize = '44';
+                    else if (hips >= 96 && hips < 100) recommendedSize = '46';
+                    else if (hips >= 100 && hips < 104) recommendedSize = '48';
+                    else recommendedSize = '50';
+                    break;
+                case 'shoes':
+                    // Простая формула для обуви
+                    const shoeSize = Math.round((height - 100) / 5 + 1);
+                    recommendedSize = shoeSize.toString();
+                    break;
+            }
+            
+            elements.recommendedSize.textContent = recommendedSize;
+            elements.sizeResult.classList.remove('hidden');
+            
+            // Обновляем выделение в таблице
+            document.querySelectorAll('#sizeTableBody tr').forEach(row => {
+                row.classList.remove('current-size');
+                if (row.cells[0].textContent === recommendedSize) {
+                    row.classList.add('current-size');
+                }
+            });
+        }
+
+        function updateCart() {
+            elements.cartCount.textContent = `${State.cart.length} товаров`;
+            elements.totalItemsCount.textContent = State.cart.length;
+            elements.totalToReceive.textContent = `${State.cart.length} позиций`;
+            
+            if (State.cart.length === 0) {
+                elements.emptyCart.classList.remove('hidden');
+                elements.cartSummary.classList.add('hidden');
+            } else {
+                elements.emptyCart.classList.add('hidden');
+                elements.cartSummary.classList.remove('hidden');
+                
+                elements.cartItems.innerHTML = '';
+                
+                State.cart.forEach(item => {
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'cart-item';
+                    cartItem.innerHTML = `
+                        <div class="cart-item-icon">
+                            <i class="fas ${getCategoryIcon(item.category)}"></i>
+                        </div>
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-details">Размер: ${item.size}</div>
+                        </div>
+                        <button class="cart-item-remove" data-id="${item.id}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    
+                    elements.cartItems.appendChild(cartItem);
+                });
+                
+                // Обработчики удаления
+                document.querySelectorAll('.cart-item-remove').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const itemId = parseInt(btn.dataset.id);
+                        removeFromCart(itemId);
+                    });
+                });
+            }
+        }
+
+        function updateCartBadge() {
+            if (State.cart.length > 0) {
+                elements.cartBadge.textContent = State.cart.length;
+                elements.cartBadge.classList.remove('hidden');
+            } else {
+                elements.cartBadge.classList.add('hidden');
+            }
+        }
+
+        function removeFromCart(itemId) {
+            const index = State.cart.findIndex(item => item.id === itemId);
+            if (index > -1) {
+                State.cart.splice(index, 1);
+                localStorage.setItem('uniformApp_cart', JSON.stringify(State.cart));
+                updateCart();
+                updateCartBadge();
+                showNotification('Удалено', 'Элемент удален из корзины', 'info');
+            }
+        }
+
+        function clearCart() {
+            if (State.cart.length === 0) return;
+            
+            if (confirm('Очистить всю корзину?')) {
+                State.cart = [];
+                localStorage.removeItem('uniformApp_cart');
+                updateCart();
+                updateCartBadge();
+                showNotification('Корзина очищена', 'Все товары удалены из корзины', 'info');
+            }
+        }
+
+        function renderReplacementItems() {
+            elements.itemForReplacement.innerHTML = '<option value="">-- Выберите элемент --</option>';
+            
+            AppData.uniforms.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `${item.name} (размер: ${item.userSize})`;
+                elements.itemForReplacement.appendChild(option);
+            });
+        }
+
+        function renderIssuedItems() {
+            elements.issuedItemsList.innerHTML = '';
+            
+            AppData.history.forEach(record => {
+                const item = document.createElement('div');
+                item.className = 'uniform-item';
+                item.style.cssText = 'margin-bottom: 8px;';
+                item.innerHTML = `
+                    <div class="uniform-item-icon" style="width: 36px; height: 36px; font-size: 16px;">
+                        <i class="fas fa-tshirt"></i>
+                    </div>
+                    <div class="uniform-item-content">
+                        <div class="uniform-item-name">${record.item}</div>
+                        <div class="uniform-item-details">
+                            Размер: ${record.size} • Выдано: ${formatDate(record.date)}
+                        </div>
+                    </div>
+                    <div class="checkbox-container">
+                        <div class="checkbox"></div>
+                    </div>
+                `;
+                
+                elements.issuedItemsList.appendChild(item);
+            });
+        }
+
+        // Календарь и время
+        function updateCalendar() {
+            const currentDate = State.calendar.currentDate;
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // Обновляем заголовок календаря
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            elements.currentMonth.textContent = `${monthNames[month]} ${year}`;
+            
+            // Получаем первый день месяца
+            const firstDay = new Date(year, month, 1);
+            // Получаем последний день месяца
+            const lastDay = new Date(year, month + 1, 0);
+            // Получаем день недели первого дня (0 - воскресенье, 1 - понедельник и т.д.)
+            let firstDayOfWeek = firstDay.getDay();
+            // Преобразуем воскресенье (0) в 6, понедельник (1) в 0 и т.д.
+            firstDayOfWeek = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+            
+            // Очищаем календарь
+            elements.calendarBody.innerHTML = '';
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            let date = 1;
+            let row = document.createElement('tr');
+            
+            // Заполняем пустые ячейки до первого дня месяца
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const cell = document.createElement('td');
+                cell.classList.add('disabled');
+                row.appendChild(cell);
+            }
+            
+            // Заполняем календарь днями месяца
+            while (date <= lastDay.getDate()) {
+                // Если строка заполнена (7 дней), начинаем новую строку
+                if (row.children.length === 7) {
+                    elements.calendarBody.appendChild(row);
+                    row = document.createElement('tr');
+                }
+                
+                const cell = document.createElement('td');
+                const currentDateObj = new Date(year, month, date);
+                
+                cell.textContent = date;
+                cell.dataset.date = formatDateForCalendar(currentDateObj);
+                
+                // Проверяем, является ли день сегодняшним
+                if (currentDateObj.getTime() === today.getTime()) {
+                    cell.classList.add('today');
+                }
+                
+                // Проверяем, является ли день прошедшим
+                if (currentDateObj < today) {
+                    cell.classList.add('disabled');
+                } else {
+                    // Проверяем, является ли день выходным (суббота или воскресенье)
+                    const dayOfWeek = currentDateObj.getDay();
+                    if (dayOfWeek === 0 || dayOfWeek === 6) {
+                        cell.classList.add('disabled');
+                    } else {
+                        // Обработчик выбора даты
+                        cell.addEventListener('click', () => {
+                            if (!cell.classList.contains('disabled')) {
+                                // Снимаем выделение со всех ячеек
+                                document.querySelectorAll('#calendarBody td').forEach(td => {
+                                    td.classList.remove('selected');
+                                });
+                                
+                                // Выделяем выбранную ячейку
+                                cell.classList.add('selected');
+                                
+                                // Сохраняем выбранную дату
+                                State.calendar.selectedDate = cell.dataset.date;
+                                
+                                // Обновляем отображение выбранной даты
+                                elements.selectedDateText.textContent = formatDateForDisplay(State.calendar.selectedDate);
+                                elements.selectedDateInfo.classList.remove('hidden');
+                                
+                                // Обновляем доступные временные слоты
+                                updateTimeSlots();
+                                
+                                // Активируем кнопку записи, если выбрано время
+                                updateConfirmButton();
+                            }
+                        });
+                    }
+                }
+                
+                // Проверяем, выбрана ли эта дата
+                if (State.calendar.selectedDate === formatDateForCalendar(currentDateObj)) {
+                    cell.classList.add('selected');
+                }
+                
+                row.appendChild(cell);
+                date++;
+            }
+            
+            // Заполняем оставшиеся ячейки пустыми
+            while (row.children.length < 7) {
+                const cell = document.createElement('td');
+                cell.classList.add('disabled');
+                row.appendChild(cell);
+            }
+            
+            elements.calendarBody.appendChild(row);
+        }
+
+        function updateTimeSlots() {
+            if (!State.calendar.selectedDate) {
+                elements.noTimeSlots.classList.remove('hidden');
+                elements.timeSlots.innerHTML = '';
+                elements.selectedTimeInfo.classList.add('hidden');
+                return;
+            }
+            
+            elements.noTimeSlots.classList.add('hidden');
+            elements.timeSlots.innerHTML = '';
+            
+            // Получаем занятые слоты для выбранной даты
+            const bookedSlots = AppData.bookedSlots[State.calendar.selectedDate] || [];
+            
+            // Создаем слоты времени
+            AppData.timeSlots.forEach(time => {
+                const timeSlot = document.createElement('div');
+                timeSlot.className = 'time-slot';
+                timeSlot.textContent = time;
+                timeSlot.dataset.time = time;
+                
+                // Проверяем, занят ли слот
+                if (bookedSlots.includes(time)) {
+                    timeSlot.classList.add('disabled');
+                } else {
+                    // Обработчик выбора времени
+                    timeSlot.addEventListener('click', () => {
+                        if (!timeSlot.classList.contains('disabled')) {
+                            // Снимаем выделение со всех слотов
+                            document.querySelectorAll('.time-slot').forEach(slot => {
+                                slot.classList.remove('selected');
+                            });
+                            
+                            // Выделяем выбранный слот
+                            timeSlot.classList.add('selected');
+                            
+                            // Сохраняем выбранное время
+                            State.calendar.selectedTime = time;
+                            
+                            // Обновляем отображение выбранного времени
+                            elements.selectedTimeText.textContent = time;
+                            elements.selectedTimeInfo.classList.remove('hidden');
+                            
+                            // Активируем кнопку записи
+                            updateConfirmButton();
+                        }
+                    });
+                }
+                
+                // Проверяем, выбрано ли это время
+                if (State.calendar.selectedTime === time) {
+                    timeSlot.classList.add('selected');
+                    elements.selectedTimeText.textContent = time;
+                    elements.selectedTimeInfo.classList.remove('hidden');
+                }
+                
+                elements.timeSlots.appendChild(timeSlot);
+            });
+        }
+
+        function updateConfirmButton() {
+            if (State.calendar.selectedDate && State.calendar.selectedTime) {
+                elements.confirmAppointmentBtn.disabled = false;
+            } else {
+                elements.confirmAppointmentBtn.disabled = true;
+            }
+        }
+
+        function formatDateForCalendar(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDateForDisplay(dateString) {
+            const date = new Date(dateString);
+            const options = { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' };
+            return date.toLocaleDateString('ru-RU', options);
+        }
+
+        // Модальные окна
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // При открытии модального окна записи сбрасываем выбор даты и времени
+            if (modalId === 'appointmentModal') {
+                State.calendar.selectedDate = null;
+                State.calendar.selectedTime = null;
+                elements.selectedDateInfo.classList.add('hidden');
+                elements.selectedTimeInfo.classList.add('hidden');
+                elements.noTimeSlots.classList.remove('hidden');
+                elements.confirmAppointmentBtn.disabled = true;
+                updateCalendar();
+                updateTimeSlots();
+            }
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function showAppointmentModal() {
+            if (State.cart.length === 0 && elements.serviceType.value !== 'dismissal') {
+                showNotification('Ошибка', 'Добавьте элементы в корзину для записи', 'error');
+                return;
+            }
+            
+            showModal('appointmentModal');
+        }
+
+        function showSizeModal(item) {
+            State.currentSizeItem = item;
+            elements.sizeModalItemName.textContent = item.name;
+            elements.currentSizeDisplay.textContent = item.userSize;
+            
+            // Очищаем и заполняем опции размеров
+            elements.sizeOptions.innerHTML = '';
+            item.availableSizes.forEach(size => {
+                const sizeOption = document.createElement('div');
+                sizeOption.className = `size-option ${size === item.userSize ? 'selected' : ''}`;
+                sizeOption.textContent = size;
+                sizeOption.dataset.size = size;
+                
+                sizeOption.addEventListener('click', () => {
+                    document.querySelectorAll('.size-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    sizeOption.classList.add('selected');
+                });
+                
+                elements.sizeOptions.appendChild(sizeOption);
+            });
+            
+            showModal('sizeModal');
+        }
+
+        function saveSize() {
+            const selectedSizeOption = document.querySelector('.size-option.selected');
+            if (!selectedSizeOption || !State.currentSizeItem) return;
+            
+            const newSize = selectedSizeOption.dataset.size;
+            const oldSize = State.currentSizeItem.userSize;
+            
+            // Обновляем размер в данных
+            State.currentSizeItem.userSize = newSize;
+            
+            // Обновляем в userSizes если нужно
+            const category = State.currentSizeItem.category;
+            if (AppData.userSizes[category]) {
+                AppData.userSizes[category] = newSize;
+            }
+            
+            // Обновляем UI
+            updateHomeScreen();
+            updateSizeGuide();
+            
+            hideModal('sizeModal');
+            showNotification('Размер изменен', `Размер "${State.currentSizeItem.name}" изменен с ${oldSize} на ${newSize}`, 'success');
+            
+            State.currentSizeItem = null;
+        }
+
+        function showDamageReplacementModal() {
+            elements.serviceType.value = 'damage';
+            elements.damageWarning.classList.remove('hidden');
+            showAppointmentModal();
+        }
+
+        function showAccountingModal() {
+            showModal('accountingModal');
+        }
+
+        function showDismissalModal() {
+            showModal('dismissalModal');
+        }
+
+        function confirmAppointment() {
+            const serviceType = elements.serviceType.value;
+            
+            if (!State.calendar.selectedDate || !State.calendar.selectedTime) {
+                showNotification('Ошибка', 'Выберите дату и время', 'error');
+                return;
+            }
+            
+            if (serviceType === 'damage') {
+                showNotification('Важная информация', 
+                    'Замена при порче/утрате производится только при наличии согласования с бухгалтерией. ' +
+                    'Пожалуйста, убедитесь, что у вас есть подтверждающие документы.', 
+                    'warning');
+            }
+            
+            hideModal('appointmentModal');
+            
+            // Добавляем запись
+            const newAppointment = {
+                id: Date.now(),
+                date: State.calendar.selectedDate,
+                time: State.calendar.selectedTime,
+                type: serviceType,
+                items: serviceType === 'dismissal' ? ['Вся форма'] : State.cart.map(item => item.name),
+                status: 'confirmed'
+            };
+            
+            AppData.appointments.push(newAppointment);
+            
+            // Добавляем слот в занятые
+            if (!AppData.bookedSlots[State.calendar.selectedDate]) {
+                AppData.bookedSlots[State.calendar.selectedDate] = [];
+            }
+            AppData.bookedSlots[State.calendar.selectedDate].push(State.calendar.selectedTime);
+            
+            // Очищаем корзину если это не сдача формы
+            if (serviceType !== 'dismissal') {
+                State.cart = [];
+                localStorage.removeItem('uniformApp_cart');
+                updateCart();
+                updateCartBadge();
+            }
+            
+            // Сбрасываем выбор даты и времени
+            State.calendar.selectedDate = null;
+            State.calendar.selectedTime = null;
+            
+            showNotification('Запись создана', 
+                `Вы записаны на ${formatDateForDisplay(newAppointment.date)} в ${newAppointment.time}. Тип услуги: ${getServiceTypeName(serviceType)}`, 
+                'success');
+        }
+
+        function submitAccountingRequest() {
+            const itemId = elements.itemForReplacement.value;
+            const reason = elements.replacementReason.value;
+            const accountingNumber = elements.accountingNumber.value;
+            const accountingDate = elements.accountingDate.value;
+            
+            if (!itemId || !accountingNumber || !accountingDate) {
+                showNotification('Ошибка', 'Заполните все обязательные поля', 'error');
+                return;
+            }
+            
+            hideModal('accountingModal');
+            
+            showNotification('Заявка отправлена', 
+                'Запрос на замену по согласованию отправлен. Вы получите уведомление о статусе обработки.', 
+                'success');
+            
+            // Сбрасываем форму
+            elements.itemForReplacement.value = '';
+            elements.replacementReason.value = 'damage';
+            elements.accountingNumber.value = '';
+            elements.accountingDate.value = '';
+            elements.replacementComment.value = '';
+        }
+
+        function submitDismissalRequest() {
+            const dismissalDate = elements.dismissalDate.value;
+            const returnDate = elements.returnDate.value;
+            
+            if (!dismissalDate || !returnDate) {
+                showNotification('Ошибка', 'Заполните даты увольнения и сдачи формы', 'error');
+                return;
+            }
+            
+            hideModal('dismissalModal');
+            
+            showNotification('Заявка на сдачу формы', 
+                'Вы записаны на сдачу формы при увольнении. Пожалуйста, принесите все выданные элементы в указанную дату.', 
+                'success');
+            
+            // Сбрасываем форму
+            elements.dismissalDate.valueAsDate = new Date();
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            elements.returnDate.valueAsDate = nextWeek;
+            elements.dismissalComment.value = '';
+        }
+
+        // Вспомогательные функции
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                'shirt': 'fa-tshirt',
+                'pants': 'fa-user-tie',
+                'jacket': 'fa-jacket',
+                'shoes': 'fa-shoe-prints',
+                'accessories': 'fa-vest',
+                'dress': 'fa-female',
+                'coat': 'fa-tshirt'
+            };
+            return icons[category] || 'fa-tshirt';
+        }
+
+        function getServiceTypeName(type) {
+            const types = {
+                'damage': 'Замена порча/утрата',
+                'dismissal': 'Сдача при увольнении',
+                'accounting': 'Замена по согласованию'
+            };
+            return types[type] || type;
+        }
+
+        function showNotification(title, message, type = 'info') {
+            const icons = {
+                'success': 'fa-check-circle',
+                'error': 'fa-exclamation-circle',
+                'warning': 'fa-exclamation-triangle',
+                'info': 'fa-info-circle'
+            };
+            
+            elements.notificationIcon.innerHTML = `<i class="fas ${icons[type]}"></i>`;
+            elements.notificationTitle.textContent = title;
+            elements.notificationMessage.textContent = message;
+            
+            elements.notification.className = `notification notification-${type}`;
+            elements.notification.classList.add('show');
+            
+            if (State.notificationTimeout) {
+                clearTimeout(State.notificationTimeout);
+            }
+            
+            State.notificationTimeout = setTimeout(hideNotification, 5000);
+        }
+
+        function hideNotification() {
+            elements.notification.classList.remove('show');
+        }
+    </script>
+</body>
+</html>
