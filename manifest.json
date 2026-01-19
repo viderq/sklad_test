@@ -1,7 +1,7 @@
 {
-  "name": "CabinTime",
-  "short_name": "CabinTime",
-  "start_url": "/time_managment/index.html",
+  "name": "Sklad",
+  "short_name": "Sklad",
+  "start_url": "/sklad_test/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4169E1",
